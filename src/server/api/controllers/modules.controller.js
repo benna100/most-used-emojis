@@ -1,152 +1,69 @@
 "use strict";
 
 const HttpError = require("../lib/utils/http-error");
-const knex = require("../../config/db");
-const path = require("path");
+var request = require("request-promise");
+const extractEmoji = require("extract-emoji");
 
-const moduleColumns = [
-  "modules.id as id",
-  "modules.title as title",
-  "modules.start_date as start_date",
-  "modules.end_date as end_date",
-  "classes.id as class_id",
-  "classes.title as class_title"
-];
-
-const getModules = async params => {
-  const modulesWithClassInfo = await knex("modules")
-    .join("classes", "modules.class_id", "=", "classes.id")
-    .columns(moduleColumns);
-
-  const moduleTeachersPromises = modulesWithClassInfo.map(module =>
-    knex("module_teachers").where("module_teachers.module_id", module.id)
+async function getTimelineTweets(username) {
+  const timelineTweetsRequest = await request.get(
+    "https://api.twitter.com/1.1/statuses/user_timeline.json",
+    {
+      oauth: {
+        consumer_key: process.env.CONSUMER_KEY,
+        consumer_secret: process.env.CONSUMER_SECRET,
+        token: process.env.TOKEN,
+        token_secret: process.env.TOKEN_SECRET,
+      },
+      qs: { screen_name: username, count: "200" },
+    }
   );
+  return JSON.parse(timelineTweetsRequest);
+}
 
-  const moduleTeachers = await Promise.all(moduleTeachersPromises);
+function getEmoijs(tweets) {
+  const emojis = [];
 
-  modulesWithClassInfo.forEach(
-    (module, i) => (module.teachers = moduleTeachers[i])
-  );
-
-  return modulesWithClassInfo;
-};
-
-const getModuleById = async moduleId => {
-  const modulesWithClassInfo = await knex("modules")
-    .join("classes", "modules.class_id", "=", "classes.id")
-    .where("modules.id", moduleId)
-    .columns(moduleColumns);
-
-  const moduleTeachersPromises = modulesWithClassInfo.map(module =>
-    knex("module_teachers").where("module_teachers.module_id", module.id)
-  );
-
-  const moduleTeachers = await Promise.all(moduleTeachersPromises);
-
-  modulesWithClassInfo.forEach(
-    (module, i) => (module.teachers = moduleTeachers[i])
-  );
-
-  return modulesWithClassInfo;
-};
-
-const editModule = async (moduleId, updatedModule) => {
-  const databaseUpdations = [];
-  databaseUpdations.push(
-    knex("modules")
-      .where({ id: moduleId })
-      .update({
-        title: updatedModule.title,
-        start_date: updatedModule.start_date,
-        end_date: updatedModule.end_date,
-        class_id: updatedModule.class_id
-      })
-  );
-
-  if (
-    updatedModule.teacher_1_module_teachers_id &&
-    updatedModule.teacher_1 !== ""
-  ) {
-    databaseUpdations.push(
-      await knex("module_teachers")
-        .where({ id: updatedModule.teacher_1_module_teachers_id })
-        .update({
-          teacher_id: updatedModule.teacher_1
-        })
-    );
-  } else if (updatedModule.teacher_1 && updatedModule.teacher_1 !== "") {
-    // should be done at the same time, teacher1 and teacher2 requests!
-    databaseUpdations.push(
-      knex("module_teachers").insert({
-        teacher_id: updatedModule.teacher_1,
-        module_id: moduleId
-      })
-    );
-  }
-
-  if (
-    updatedModule.teacher_2_module_teachers_id &&
-    updatedModule.teacher_2 !== ""
-  ) {
-    databaseUpdations.push(
-      knex("module_teachers")
-        .where({ id: updatedModule.teacher_2_module_teachers_id })
-        .update({
-          teacher_id: updatedModule.teacher_2
-        })
-    );
-  } else if (updatedModule.teacher_2 && updatedModule.teacher_2 !== "") {
-    // should be done at the same time, teacher2 and teacher2 requests!
-    databaseUpdations.push(
-      knex("module_teachers").insert({
-        teacher_id: updatedModule.teacher_2,
-        module_id: moduleId
-      })
-    );
-  }
-
-  return Promise.all(databaseUpdations);
-};
-
-const deleteModule = async (modulesId, req) => {
-  return knex("modules")
-    .where({ id: modulesId })
-    .del();
-};
-
-const createModule = async body => {
-  const [moduleId] = await knex("modules").insert({
-    title: body.title,
-    start_date: body.start_date,
-    end_date: body.end_date,
-    class_id: body.class_id
+  tweets.forEach(({ text }) => {
+    const extractedEmojis = extractEmoji.extractEmoji(text);
+    extractedEmojis.forEach((emoji) => emojis.push(emoji));
   });
 
-  if (body.teacher_1) {
-    // should be done at the same time, teacher1 and teacher2 requests!
-    await knex("module_teachers").insert({
-      teacher_id: body.teacher_1,
-      module_id: moduleId
-    });
+  return emojis;
+}
+
+function analyzeEmojis(emojis) {
+  const emojiAnalysis = {};
+  emojis.forEach((emoji) => {
+    if (emoji in emojiAnalysis) {
+      emojiAnalysis[emoji]++;
+    } else {
+      emojiAnalysis[emoji] = 1;
+    }
+  });
+
+  const emojiAnalysisArray = [];
+  for (var emoji in emojiAnalysis) {
+    emojiAnalysisArray.push({ emoji, count: emojiAnalysis[emoji] });
   }
 
-  if (body.teacher_2) {
-    // should be done at the same time, teacher1 and teacher2 requests!
-    await knex("module_teachers").insert({
-      teacher_id: body.teacher_2,
-      module_id: moduleId
-    });
-  }
+  return emojiAnalysisArray;
+}
 
-  return {
-    successful: true
-  };
+function getMostUsedEmojis(tweets) {
+  const emojis = getEmoijs(tweets);
+
+  const mostUsedEmojisArray = analyzeEmojis(emojis);
+
+  return mostUsedEmojisArray;
+}
+
+const getModules = async (req) => {
+  const timelineTweets = await getTimelineTweets(req.query.username);
+  console.log(req.query.username);
+
+  return getMostUsedEmojis(timelineTweets);
 };
 
 module.exports = {
   getModules,
-  getModuleById,
-  deleteModule,
-  createModule,
-  editModule
 };
