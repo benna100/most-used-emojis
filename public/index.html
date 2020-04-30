@@ -17,15 +17,17 @@
       rel="stylesheet"
       href="https://use.fontawesome.com/releases/v5.8.1/css/all.css"
     />
-    <title>HYF - Calendar</title>
+    <title>Most used emojis</title>
   </head>
   <body>
     <noscript>You need to enable JavaScript to run this app.</noscript>
     <main>
       <h1>
-        What is your most used emoji?
+        What is your most used emojis?
       </h1>
-      <h2>Put in your twitter username and press that button!</h2>
+      <h2>
+        Put in your twitter username and see which emojis you use the most!
+      </h2>
 
       <div class="wrapper">
         <input type="text" placeholder="Twitter username" />
@@ -34,6 +36,10 @@
         <span class="loading">Loading</span>
       </div>
       <ul></ul>
+      <span class="project-by">
+        The tweets go 400 tweets back (because rate limiting), retweets are
+        excluded, includes replies
+      </span>
       <span class="project-by">
         This is a project by
         <a
