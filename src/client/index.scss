@@ -115,10 +115,18 @@ main {
       text-decoration: none;
     }
   }
+  section.outro {
+    span {
+      display: block;
+      text-align: center;
+      max-width: 550px;
+      margin-left: auto;
+      margin-right: auto;
+      line-height: 2rem;
+    }
+  }
 
   span.project-by {
-    display: block;
-    text-align: center;
     margin-top: 36px;
     margin-bottom: 48px;
   }
