@@ -33,7 +33,8 @@ function renderShareButtons(mostUsedEmojis, username) {
   $shareSection.classList.add("shown");
 }
 
-document.querySelector("button").addEventListener("click", async () => {
+document.querySelector("form").addEventListener("submit", async (event) => {
+  event.preventDefault();
   $span.classList.add("shown");
   $shareSection.classList.remove("shown");
 
