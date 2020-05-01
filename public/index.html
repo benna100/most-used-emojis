@@ -22,33 +22,50 @@
   <body>
     <noscript>You need to enable JavaScript to run this app.</noscript>
     <main>
-      <h1>
-        What is your most used emojis?
-      </h1>
-      <h2>
-        Put in your twitter username and see which emojis you use the most!
-      </h2>
+      <section class="intro">
+        <h1>
+          What is your most used emojis?
+        </h1>
+        <h2>
+          Put in your twitter username and see which emojis you use the most!
+        </h2>
+      </section>
+      <section class="input">
+        <div class="wrapper">
+          <input type="text" placeholder="Twitter username" />
 
-      <div class="wrapper">
-        <input type="text" placeholder="Twitter username" />
-
-        <button>Get most used emojis</button>
-        <span class="loading">Loading</span>
-      </div>
-      <ul></ul>
-      <span class="project-by">
-        The tweets go 400 tweets back (because rate limiting), retweets are
-        excluded, includes replies
-      </span>
-      <span class="project-by">
-        This is a project by
+          <button>Get most used emojis</button>
+          <span class="loading">Loading</span>
+        </div>
+      </section>
+      <section class="most-used-emojis">
+        <ul></ul>
+      </section>
+      <section class="share">
         <a
-          href="https://twitter.com/DalsHughes"
+          href="https://twitter.com/share?url=http://most-used-emojis.herokuapp.com/&via=dalshughes&text=TEXT"
+          onclick="javascript:window.open(this.href, '', 'menubar=no,toolbar=no,resizable=yes,scrollbars=yes,height=300,width=600');return false;"
           target="_blank"
-          rel="noopener noreferrer"
-          >Benjamin Hughes</a
-        >
-      </span>
+          title="Share on Twitter"
+          class="twitter"
+          >Share on twitter
+        </a>
+      </section>
+      <section class="outro">
+        <span class="project-by">
+          The analysed tweets includes replies and use the 400 latest (because
+          rate limiting). Retweets are excluded
+        </span>
+        <span class="project-by">
+          This is a project by
+          <a
+            href="https://twitter.com/DalsHughes"
+            target="_blank"
+            rel="noopener noreferrer"
+            >Benjamin Hughes</a
+          >
+        </span>
+      </section>
     </main>
   </body>
 </html>
