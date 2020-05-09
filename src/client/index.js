@@ -45,11 +45,15 @@ document.querySelector("form").addEventListener("submit", async (event) => {
       `api/modules?username=${twitterUsername}`
     );
     const mostUsedEmojis = await mostUsedEmojisRequest.json();
+    if (mostUsedEmojis.length === 0) {
+      alert(`${twitterUsername} has not used any emojis`);
+    }
     mostUsedEmojis.sort((a, b) => (a.count > b.count ? -1 : 1));
     renderEmojis(mostUsedEmojis);
     renderShareButtons(mostUsedEmojis, twitterUsername);
   } catch (error) {
     alert(`Could not get Tweets for username: ${twitterUsername}`);
     $span.classList.remove("shown");
+    renderEmojis([]);
   }
 });
