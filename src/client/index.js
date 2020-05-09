@@ -19,6 +19,11 @@ function renderEmojis(emojis) {
 }
 
 function renderShareButtons(mostUsedEmojis, username) {
+  if (mostUsedEmojis.length === 0) {
+    alert(`${twitterUsername} has not used any emojis`);
+    $shareSection.classList.remove("shown");
+    return;
+  }
   let shareText = `${username}'s most used emojis are:`;
 
   mostUsedEmojis.forEach(({ emoji, count }, i) => {
@@ -45,9 +50,7 @@ document.querySelector("form").addEventListener("submit", async (event) => {
       `api/modules?username=${twitterUsername}`
     );
     const mostUsedEmojis = await mostUsedEmojisRequest.json();
-    if (mostUsedEmojis.length === 0) {
-      alert(`${twitterUsername} has not used any emojis`);
-    }
+
     mostUsedEmojis.sort((a, b) => (a.count > b.count ? -1 : 1));
     renderEmojis(mostUsedEmojis);
     renderShareButtons(mostUsedEmojis, twitterUsername);
