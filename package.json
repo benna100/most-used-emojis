@@ -7,7 +7,7 @@
     "node": "8.11.1"
   },
   "scripts": {
-    "build": "webpack --mode production",
+    "build": "npm install && webpack --mode production",
     "start": "npm run build && node ./src/server/bin/server",
     "client": "webpack-dev-server --mode development --devtool inline-source-map --hot",
     "server": "nodemon ./src/server/bin/server",
